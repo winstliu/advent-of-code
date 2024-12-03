@@ -1,21 +1,24 @@
 pub fn part_1(contents: &str) -> Result<u64, String> {
-    contents.lines().try_fold(0, |acc, line| {
-        let readings = try_parse_readings(line)?;
+    contents.lines().filter(|line| {
+        let Ok(readings) = try_parse_readings(line) else {
+            return false;
+        };
 
         // First figure out if we are descending or ascending
         let is_descending = readings[1] < readings[0];
 
         // Then check if the readings don't change too fast
-        let result = readings.windows(2).all(|pair| {
+        readings.windows(2).all(|pair| {
             is_safe(pair[0], pair[1], is_descending)
-        });
-        Ok(acc + result as u64)
-    })
+        })
+    }).count().try_into().map_err(|err: std::num::TryFromIntError| err.to_string())
 }
 
 pub fn part_2(contents: &str) -> Result<u64, String> {
-    contents.lines().try_fold(0, |acc, line| {
-        let readings = try_parse_readings(line)?;
+    contents.lines().filter(|line| {
+        let Ok(readings) = try_parse_readings(line) else {
+            return false;
+        };
 
         let num_negative = readings.windows(2).map(|pair| {
             pair[1] as i64 - pair[0] as i64
@@ -37,11 +40,11 @@ pub fn part_2(contents: &str) -> Result<u64, String> {
                 used_problem_dampener = true;
             } else {
                 println!("FAIL A: {}", line);
-                return Ok(acc);
+                return false;
             }
         }
 
-        let result = readings[1..].windows(3).all(|triplet| {
+        readings[1..].windows(3).all(|triplet| {
             let first_pair_is_safe = if index_to_remove >= 0 {
                 true
             } else {
@@ -80,10 +83,8 @@ pub fn part_2(contents: &str) -> Result<u64, String> {
             }
 
             true
-        });
-
-        Ok(acc + result as u64)
-    })
+        })
+    }).count().try_into().map_err(|err: std::num::TryFromIntError| err.to_string())
 }
 
 fn try_parse_readings(line: &str) -> Result<Vec<u64>, String> {
