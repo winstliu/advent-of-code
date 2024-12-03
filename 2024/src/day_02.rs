@@ -17,17 +17,12 @@ pub fn part_2(contents: &str) -> Result<u64, String> {
     contents.lines().try_fold(0, |acc, line| {
         let readings = try_parse_readings(line)?;
 
-        let diffs = readings.windows(2).map(|pair| {
+        let num_negative = readings.windows(2).map(|pair| {
             pair[1] as i64 - pair[0] as i64
-        });
-
-        let num_negative = diffs.clone().filter(|&val| val < 0).count();
-        let num_positive = diffs.clone().filter(|&val| val > 0).count();
-
-        let is_descending = num_negative > num_positive;
+        }).filter(|&val| val < 0).count();
+        let is_descending = num_negative > readings.len() - num_negative;
 
         let mut used_problem_dampener = false;
-
         let mut index_to_remove = -1;
 
         let very_first_pair_is_safe = is_safe(readings[0], readings[1], is_descending);
@@ -46,17 +41,17 @@ pub fn part_2(contents: &str) -> Result<u64, String> {
             }
         }
 
-        let result = readings[1..].windows(3).all(|triple| {
+        let result = readings[1..].windows(3).all(|triplet| {
             let first_pair_is_safe = if index_to_remove >= 0 {
                 true
             } else {
-                is_safe(triple[0], triple[1], is_descending)
+                is_safe(triplet[0], triplet[1], is_descending)
             };
 
             let second_pair_is_safe = if index_to_remove == 1 {
-                is_safe(triple[0], triple[2], is_descending)
+                is_safe(triplet[0], triplet[2], is_descending)
             } else {
-                is_safe(triple[1], triple[2], is_descending)
+                is_safe(triplet[1], triplet[2], is_descending)
             };
             index_to_remove -= 1;
 
@@ -70,7 +65,7 @@ pub fn part_2(contents: &str) -> Result<u64, String> {
             }
 
             if !first_pair_is_safe {
-                if is_safe(triple[0], triple[2], is_descending) {
+                if is_safe(triplet[0], triplet[2], is_descending) {
                     index_to_remove = 0;
                     used_problem_dampener = true;
                 } else {
