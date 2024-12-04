@@ -44,14 +44,10 @@ fn is_report_safe(report: &[u64]) -> bool {
     let is_descending = report[1] < report[0];
 
     // Then check if the levels don't change too fast
-    if report.windows(2).all(|pair| {
+    report.windows(2).all(|pair| {
         if (is_descending && pair[1] >= pair[0]) || (!is_descending && pair[1] <= pair[0]) {
             return false;
         }
         pair[1].abs_diff(pair[0]) <= 3
-    }) {
-        return true;
-    }
-
-    false
+    })
 }
