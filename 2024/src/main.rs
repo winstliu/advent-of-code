@@ -1,6 +1,7 @@
 mod day_01;
 mod day_02;
 mod day_03;
+mod day_04;
 
 mod utilities;
 
@@ -24,6 +25,7 @@ fn main() -> Result<(), String> {
         [day_01::part_1, day_01::part_2],
         [day_02::part_1, day_02::part_2],
         [day_03::part_1, day_03::part_2],
+        [day_04::part_1, day_04::part_2],
     ];
 
     let days_to_run = match args.day {
