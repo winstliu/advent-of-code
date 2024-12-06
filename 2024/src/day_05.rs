@@ -35,7 +35,10 @@ pub fn part_2(contents: &str) -> Result<u64, String> {
         let Ok(pages) = line
             .split(',')
             .map(|page| page.parse::<u64>().map_err(|err| err.to_string()))
-            .collect::<Result<Vec<_>, _>>() else { return None; };
+            .collect::<Result<Vec<_>, _>>()
+        else {
+            return None;
+        };
         if !are_pages_sorted(&pages, &rules) {
             return Some(pages);
         }
@@ -43,8 +46,30 @@ pub fn part_2(contents: &str) -> Result<u64, String> {
         None
     });
 
-    Ok(invalid_updates.fold(0, |acc, pages| {
-        acc + 1
+    Ok(invalid_updates.fold(0, |acc, mut pages| loop {
+        for (i, page) in pages.clone().iter().enumerate() {
+            for (a, b) in rules.iter().filter(|(a, b)| page == a || page == b) {
+                if page == a {
+                    if let Some(j) = pages.iter().position(|p| p == b) {
+                        if i > j {
+                            pages.swap(i, j);
+                        }
+                    }
+                }
+
+                if page == b {
+                    if let Some(j) = pages.iter().position(|p| p == a) {
+                        if i < j {
+                            pages.swap(i, j);
+                        }
+                    }
+                }
+            }
+        }
+
+        if are_pages_sorted(&pages, &rules) {
+            return acc + pages[(pages.len() - 1) / 2];
+        }
     }))
 }
 
