@@ -99,12 +99,9 @@ fn parse_grid(contents: &str) -> (HashMap<char, Vec<Position>>, (usize, usize)) 
                         continue;
                     }
 
-                    match acc.get_mut(&c) {
-                        Some(v) => v.push((row, col)),
-                        None => {
-                            acc.insert(c, vec![(row, col)]);
-                        }
-                    }
+                    acc.entry(c)
+                        .and_modify(|v| v.push((row, col)))
+                        .or_insert(vec![(row, col)]);
                 }
 
                 row_length += 1;
