@@ -6,6 +6,7 @@ mod day_05;
 mod day_06;
 mod day_07;
 mod day_08;
+mod day_09;
 
 mod utilities;
 
@@ -34,12 +35,13 @@ fn main() -> Result<(), String> {
         [day_06::part_1, day_06::part_2],
         [day_07::part_1, day_07::part_2],
         [day_08::part_1, day_08::part_2],
+        [day_09::part_1, day_09::part_2],
     ];
 
     let days_to_run = match args.day {
         Some(day) if day <= puzzles.len() => day..=day,
         Some(day) => return Err(format!("day {} not yet registered in main.rs", day)),
-        None => 1..=puzzles.len(),
+        None => 9..=9,
     };
 
     let parts_to_run = match args.part {
