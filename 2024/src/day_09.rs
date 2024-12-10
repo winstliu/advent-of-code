@@ -53,7 +53,39 @@ pub fn part_1(contents: &str) -> Result<u64, String> {
 }
 
 pub fn part_2(contents: &str) -> Result<u64, String> {
-    Ok(0)
+    let file_blocks = try_parse_input(contents)?;
+    let occupied_blocks = file_blocks.iter().filter_map(|block| block.0.map(|id| (id, block.1, block.2))).collect::<Vec<_>>();
+    let mut empty_blocks = file_blocks.into_iter().filter(|block| block.0.is_none()).collect::<Vec<_>>();
+
+    let mut acc = 0;
+    for occupied_block in occupied_blocks.iter().rev() {
+        let mut moved = false;
+        for empty_block in empty_blocks.iter_mut() {
+            if empty_block.1 > occupied_block.1 {
+                break;
+            }
+
+            if occupied_block.2 <= empty_block.2 {
+                let transfer_length = occupied_block.2;
+                let id: u64 = occupied_block.0.try_into().map_err(|err: std::num::TryFromIntError| err.to_string())?;
+                let sum: u64 = (empty_block.1..(empty_block.1 + transfer_length)).sum();
+                acc += id * sum;
+
+                *empty_block = (None, empty_block.1 + transfer_length, empty_block.2 - transfer_length);
+
+                moved = true;
+                break;
+            }
+        }
+
+        if !moved {
+            let id: u64 = occupied_block.0.try_into().map_err(|err: std::num::TryFromIntError| err.to_string())?;
+            let sum: u64 = (occupied_block.1..(occupied_block.1 + occupied_block.2)).sum();
+            acc += id * sum;
+        }
+    }
+
+    Ok(acc)
 }
 
 // id, start, length
