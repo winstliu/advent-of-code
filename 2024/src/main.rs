@@ -41,7 +41,7 @@ fn main() -> Result<(), String> {
     let days_to_run = match args.day {
         Some(day) if day <= puzzles.len() => day..=day,
         Some(day) => return Err(format!("day {} not yet registered in main.rs", day)),
-        None => 9..=9,
+        None => 1..=puzzles.len(),
     };
 
     let parts_to_run = match args.part {
