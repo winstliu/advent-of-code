@@ -25,11 +25,9 @@ fn try_parse_grid(contents: &str) -> Result<Vec<Vec<u32>>, String> {
         .map(|line| {
             line.chars()
                 .map(|height| {
-                    let Some(height) = height.to_digit(10) else {
-                        return Err(format!("could not parse {} as u32", height));
-                    };
-
-                    Ok(height)
+                    height
+                        .to_digit(10)
+                        .ok_or(format!("Could not parse {} as u32", height))
                 })
                 .collect()
         })

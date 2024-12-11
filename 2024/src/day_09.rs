@@ -125,7 +125,7 @@ fn try_parse_input(contents: &str) -> Result<Vec<(Option<usize>, u64, u64)>, Str
         .enumerate()
         .map(|(i, len)| {
             let Some(len) = len.to_digit(10).map(u64::from) else {
-                return Err(format!("could not parse {} as u64", len));
+                return Err(format!("Could not parse {} as u64", len));
             };
 
             let res = if i % 2 == 0 {
