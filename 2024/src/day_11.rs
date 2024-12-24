@@ -13,17 +13,18 @@ pub fn part_1(contents: &str) -> Result<u64, String> {
 
 pub fn part_2(contents: &str) -> Result<u64, String> {
     let stones = try_get_stones(contents)?;
-    let mut stone_counts = HashMap::<u64, u64>::new();
+    let mut stone_counts = HashMap::new();
     for stone in &stones {
-        stone_counts.insert(*stone, 1);
+        stone_counts.insert(*stone, 1_u64);
     }
 
     for _ in 0..75 {
-        let mut next_stone_counts = HashMap::<u64, u64>::new();
-        for (stone, count) in stone_counts.iter() {
+        let mut next_stone_counts = HashMap::new();
+        for (stone, count) in &stone_counts {
             let new_stones = mutate_stone(stone);
             for new_stone in &new_stones {
-                next_stone_counts.entry(*new_stone)
+                next_stone_counts
+                    .entry(*new_stone)
                     .and_modify(|c| *c += *count)
                     .or_insert(*count);
             }
@@ -31,12 +32,7 @@ pub fn part_2(contents: &str) -> Result<u64, String> {
         stone_counts = next_stone_counts;
     }
 
-    let mut num_stones = 0;
-    for (_, count) in stone_counts.iter() {
-        num_stones += count;
-    }
-
-    Ok(num_stones)
+    Ok(stone_counts.values().sum())
 }
 
 fn try_get_stones(contents: &str) -> Result<Vec<u64>, String> {
