@@ -116,26 +116,15 @@ fn get_region_sides(grid: &[Vec<char>], region_positions: &HashSet<(usize, usize
         .collect::<HashMap<_, _>>();
 
     let mut num_total_edges: u64 = 0;
-    // while let Some(((row, col), edges)) = positions_with_edges.iter_mut().next() {
-    while !positions_with_edges.is_empty() {
-        let starting_row ;
-        let starting_col ;
-        let edges ;
-        {
-            let ((a, b), c) = positions_with_edges.iter().next().unwrap();
-            starting_row = *a;
-            starting_col = *b;
-            edges = *c;
-        }
-        // test
-        // *edges -= 1;
-        positions_with_edges.remove(&(starting_row, starting_col)); // MUT CANARY
+    while let Some(((starting_row, starting_col), edges)) = positions_with_edges.iter().next() {
+        let starting_row = *starting_row;
+        let starting_col = *starting_col;
+        let edges = *edges;
 
-        // LOOP -> Trace edges starting at (row, col) until we hit (row, col), decrementing edge count of each position we stop at
         let mut row = starting_row;
         let mut col = starting_col;
-        let mut direction ;
-        let mut edge_position ;
+        let mut direction;
+        let mut edge_position;
 
         // v col
         // 0AAAAA <-- row
@@ -182,35 +171,49 @@ fn get_region_sides(grid: &[Vec<char>], region_positions: &HashSet<(usize, usize
         // else
         //      turn left (Direction::Left, EdgePosition::Top)
 
-        // figure out direction to go
-        if starting_row == 0 || grid[starting_row - 1][starting_col] != grid[starting_row][starting_col] {
+        if starting_row == 0
+            || grid[starting_row - 1][starting_col] != grid[starting_row][starting_col]
+        {
             direction = Direction::Right;
             edge_position = EdgePosition::Top;
-        } else if starting_row == grid.len() - 1 || grid[starting_row + 1][starting_col] != grid[starting_row][starting_col] {
+        } else if starting_row == grid.len() - 1
+            || grid[starting_row + 1][starting_col] != grid[starting_row][starting_col]
+        {
             direction = Direction::Left;
             edge_position = EdgePosition::Bottom;
-        } else if starting_col == 0 || grid[starting_row][starting_col - 1] != grid[starting_row][starting_col] {
+        } else if starting_col == 0
+            || grid[starting_row][starting_col - 1] != grid[starting_row][starting_col]
+        {
             direction = Direction::Up;
             edge_position = EdgePosition::Left;
-        } else if starting_col == grid[0].len() - 1 || grid[starting_row][starting_col + 1] != grid[starting_row][starting_col] {
+        } else if starting_col == grid[starting_row].len() - 1
+            || grid[starting_row][starting_col + 1] != grid[starting_row][starting_col]
+        {
             direction = Direction::Down;
             edge_position = EdgePosition::Right;
         } else {
             panic!("No edge found at ({}, {})", starting_row, starting_col);
         }
 
+        num_total_edges += 1;
+
         let starting_direction = direction;
         loop {
+            positions_with_edges.insert((row, col), edges - 1);
+
             if direction == Direction::Up {
                 if edge_position == EdgePosition::Right {
-                    if positions_with_edges.contains_key(&(starting_row - 1, starting_col + 1)) {
+                    if row > 0
+                        && col < grid[row - 1].len() - 1
+                        && positions_with_edges.contains_key(&(row - 1, col + 1))
+                    {
                         row -= 1;
                         col += 1;
                         direction = Direction::Right;
                         edge_position = EdgePosition::Bottom;
 
                         num_total_edges += 1;
-                    } else if positions_with_edges.contains_key(&(starting_row - 1, starting_col)) {
+                    } else if row > 0 && positions_with_edges.contains_key(&(row - 1, col)) {
                         row -= 1;
                     } else {
                         direction = Direction::Left;
@@ -218,12 +221,151 @@ fn get_region_sides(grid: &[Vec<char>], region_positions: &HashSet<(usize, usize
 
                         num_total_edges += 1;
                     }
-                } else {
-                    // if positions_with_edges.contains_key()
+                } else if edge_position == EdgePosition::Left {
+                    if row > 0 && col > 0 && positions_with_edges.contains_key(&(row - 1, col - 1))
+                    {
+                        row -= 1;
+                        col -= 1;
+                        direction = Direction::Left;
+                        edge_position = EdgePosition::Bottom;
+
+                        num_total_edges += 1;
+                    } else if row > 0 && positions_with_edges.contains_key(&(row - 1, col)) {
+                        row -= 1;
+                    } else {
+                        direction = Direction::Right;
+                        edge_position = EdgePosition::Top;
+
+                        num_total_edges += 1;
+                    }
+                }
+            } else if direction == Direction::Right {
+                if edge_position == EdgePosition::Top {
+                    if row > 0
+                        && col < grid[row - 1].len() - 1
+                        && positions_with_edges.contains_key(&(row - 1, col + 1))
+                    {
+                        row -= 1;
+                        col += 1;
+                        direction = Direction::Up;
+                        edge_position = EdgePosition::Left;
+
+                        num_total_edges += 1;
+                    } else if col < grid[row].len() - 1
+                        && positions_with_edges.contains_key(&(row, col + 1))
+                    {
+                        col += 1;
+                    } else {
+                        direction = Direction::Down;
+                        edge_position = EdgePosition::Right;
+
+                        num_total_edges += 1;
+                    }
+                } else if edge_position == EdgePosition::Bottom {
+                    if row < grid.len() - 1
+                        && col < grid[row + 1].len() - 1
+                        && positions_with_edges.contains_key(&(row + 1, col + 1))
+                    {
+                        row += 1;
+                        col += 1;
+                        direction = Direction::Down;
+                        edge_position = EdgePosition::Left;
+
+                        num_total_edges += 1;
+                    } else if col < grid[row].len() - 1
+                        && positions_with_edges.contains_key(&(row, col + 1))
+                    {
+                        col += 1;
+                    } else {
+                        direction = Direction::Up;
+                        edge_position = EdgePosition::Right;
+
+                        num_total_edges += 1;
+                    }
+                }
+            } else if direction == Direction::Down {
+                if edge_position == EdgePosition::Right {
+                    if row < grid.len() - 1
+                        && col < grid[row + 1].len() - 1
+                        && positions_with_edges.contains_key(&(row + 1, col + 1))
+                    {
+                        row += 1;
+                        col += 1;
+                        direction = Direction::Right;
+                        edge_position = EdgePosition::Top;
+
+                        num_total_edges += 1;
+                    } else if row < grid.len() - 1
+                        && positions_with_edges.contains_key(&(row + 1, col))
+                    {
+                        row += 1;
+                    } else {
+                        direction = Direction::Left;
+                        edge_position = EdgePosition::Bottom;
+
+                        num_total_edges += 1;
+                    }
+                } else if edge_position == EdgePosition::Left {
+                    if row < grid.len() - 1
+                        && col > 0
+                        && positions_with_edges.contains_key(&(row + 1, col - 1))
+                    {
+                        row += 1;
+                        col -= 1;
+                        direction = Direction::Left;
+                        edge_position = EdgePosition::Top;
+
+                        num_total_edges += 1;
+                    } else if row < grid.len() - 1
+                        && positions_with_edges.contains_key(&(row + 1, col))
+                    {
+                        row += 1;
+                    } else {
+                        direction = Direction::Right;
+                        edge_position = EdgePosition::Bottom;
+
+                        num_total_edges += 1;
+                    }
+                }
+            } else if direction == Direction::Left {
+                if edge_position == EdgePosition::Top {
+                    if row > 0 && col > 0 && positions_with_edges.contains_key(&(row - 1, col - 1))
+                    {
+                        row -= 1;
+                        col -= 1;
+                        direction = Direction::Up;
+                        edge_position = EdgePosition::Right;
+
+                        num_total_edges += 1;
+                    } else if col > 0 && positions_with_edges.contains_key(&(row, col - 1)) {
+                        col -= 1;
+                    } else {
+                        direction = Direction::Down;
+                        edge_position = EdgePosition::Left;
+
+                        num_total_edges += 1;
+                    }
+                } else if edge_position == EdgePosition::Bottom {
+                    if row < grid.len() - 1
+                        && col > 0
+                        && positions_with_edges.contains_key(&(row + 1, col - 1))
+                    {
+                        row += 1;
+                        col -= 1;
+                        direction = Direction::Down;
+                        edge_position = EdgePosition::Right;
+
+                        num_total_edges += 1;
+                    } else if col > 0 && positions_with_edges.contains_key(&(row, col - 1)) {
+                        col -= 1;
+                    } else {
+                        direction = Direction::Up;
+                        edge_position = EdgePosition::Left;
+
+                        num_total_edges += 1;
+                    }
                 }
             }
-
-            positions_with_edges.insert((row, col), edges - 1);
 
             if row == starting_row && col == starting_col {
                 if direction == starting_direction {
@@ -231,14 +373,9 @@ fn get_region_sides(grid: &[Vec<char>], region_positions: &HashSet<(usize, usize
                 }
                 break;
             }
-
         }
 
-        // positions_with_edges.insert((a, b), *edges - 1);
-
-        // Add edge count to num_total_edges
-
-        // Remove all postions with edges == 0
+        positions_with_edges.retain(|_, edges| *edges > 0);
     }
 
     num_total_edges
@@ -259,7 +396,7 @@ fn get_plot_edges(grid: &[Vec<char>], plot: char, row: usize, col: usize) -> u64
         length += 1;
     }
 
-    if col == grid[0].len() - 1 || grid[row][col + 1] != plot {
+    if col == grid[row].len() - 1 || grid[row][col + 1] != plot {
         length += 1;
     }
 
@@ -279,5 +416,5 @@ enum EdgePosition {
     Top,
     Bottom,
     Left,
-    Right
+    Right,
 }
