@@ -110,7 +110,7 @@ fn get_region_sides(grid: &[Vec<char>], region_positions: &HashSet<(usize, usize
                 Some((
                     (*row, *col),
                     (
-                        get_plot_sides(grid, grid[*row][*col], *row, *col), // number of unexplored sides
+                        sides, // number of unexplored sides
                         HashSet::new(), // already explored sides
                     ),
                 ))
@@ -118,7 +118,7 @@ fn get_region_sides(grid: &[Vec<char>], region_positions: &HashSet<(usize, usize
         })
         .collect::<HashMap<_, _>>();
 
-    let mut total_sides: u64 = 0;
+    let mut total_sides = 0;
     while let Some(((starting_row, starting_col), (_, explored_sides))) =
         sides_to_explore.iter().next()
     {
