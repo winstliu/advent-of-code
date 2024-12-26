@@ -11,16 +11,19 @@ pub fn part_1(contents: &str) -> Result<u64, String> {
                 continue;
             }
 
-            let plot_positions = get_plot_positions(&grid, *plot, row, col);
-            let area = plot_positions.len() as u64;
-            let perimeter = plot_positions
+            let region_positions = get_region_positions(&grid, *plot, row, col);
+            let area: u64 = region_positions
+                .len()
+                .try_into()
+                .map_err(|err: std::num::TryFromIntError| err.to_string())?;
+            let perimeter = region_positions
                 .iter()
                 .map(|(row, col)| get_plot_boundary_length(&grid, *plot, *row, *col))
                 .sum::<u64>();
 
             total_price += area * perimeter;
 
-            visited_positions.extend(plot_positions.iter());
+            visited_positions.extend(region_positions.iter());
         }
     }
 
@@ -38,7 +41,7 @@ fn parse_grid(contents: &str) -> Vec<Vec<char>> {
         .collect()
 }
 
-fn get_plot_positions(
+fn get_region_positions(
     grid: &[Vec<char>],
     plot: char,
     row: usize,
