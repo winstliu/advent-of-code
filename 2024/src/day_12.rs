@@ -198,6 +198,7 @@ fn get_region_sides(grid: &[Vec<char>], region_positions: &HashSet<(usize, usize
         num_total_edges += 1;
 
         let starting_direction = direction;
+        let starting_edge_position = edge_position;
         loop {
             positions_with_edges.insert((row, col), edges - 1);
 
@@ -367,10 +368,13 @@ fn get_region_sides(grid: &[Vec<char>], region_positions: &HashSet<(usize, usize
                 }
             }
 
-            if row == starting_row && col == starting_col {
-                if direction == starting_direction {
-                    num_total_edges -= 1;
-                }
+            if row == starting_row
+                && col == starting_col
+                && direction == starting_direction
+                && edge_position == starting_edge_position
+            {
+                // Don't overcount by one
+                num_total_edges -= 1;
                 break;
             }
         }
@@ -411,7 +415,7 @@ enum Direction {
     Right,
 }
 
-#[derive(PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 enum EdgePosition {
     Top,
     Bottom,
