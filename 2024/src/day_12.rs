@@ -109,17 +109,21 @@ fn get_region_sides(grid: &[Vec<char>], region_positions: &HashSet<(usize, usize
             } else {
                 Some((
                     (*row, *col),
-                    get_plot_edges(grid, grid[*row][*col], *row, *col),
+                    (
+                        get_plot_edges(grid, grid[*row][*col], *row, *col),
+                        HashSet::new(),
+                    ),
                 ))
             }
         })
         .collect::<HashMap<_, _>>();
 
     let mut num_total_edges: u64 = 0;
-    while let Some(((starting_row, starting_col), edges)) = positions_with_edges.iter().next() {
+    while let Some(((starting_row, starting_col), (_, explored_sides))) =
+        positions_with_edges.iter().next()
+    {
         let starting_row = *starting_row;
         let starting_col = *starting_col;
-        let edges = *edges;
 
         let mut row = starting_row;
         let mut col = starting_col;
@@ -171,28 +175,33 @@ fn get_region_sides(grid: &[Vec<char>], region_positions: &HashSet<(usize, usize
         // else
         //      turn left (Direction::Left, EdgePosition::Top)
 
-        if starting_row == 0
-            || grid[starting_row - 1][starting_col] != grid[starting_row][starting_col]
+        if !explored_sides.contains(&EdgePosition::Top)
+            && (starting_row == 0 || !region_positions.contains(&(starting_row - 1, starting_col)))
         {
             direction = Direction::Right;
             edge_position = EdgePosition::Top;
-        } else if starting_row == grid.len() - 1
-            || grid[starting_row + 1][starting_col] != grid[starting_row][starting_col]
-        {
-            direction = Direction::Left;
-            edge_position = EdgePosition::Bottom;
-        } else if starting_col == 0
-            || grid[starting_row][starting_col - 1] != grid[starting_row][starting_col]
-        {
-            direction = Direction::Up;
-            edge_position = EdgePosition::Left;
-        } else if starting_col == grid[starting_row].len() - 1
-            || grid[starting_row][starting_col + 1] != grid[starting_row][starting_col]
+        } else if !explored_sides.contains(&EdgePosition::Right)
+            && (starting_col == grid[starting_row].len() - 1
+                || !region_positions.contains(&(starting_row, starting_col + 1)))
         {
             direction = Direction::Down;
             edge_position = EdgePosition::Right;
+        } else if !explored_sides.contains(&EdgePosition::Bottom)
+            && (starting_row == grid.len() - 1
+                || !region_positions.contains(&(starting_row + 1, starting_col)))
+        {
+            direction = Direction::Left;
+            edge_position = EdgePosition::Bottom;
+        } else if !explored_sides.contains(&EdgePosition::Left)
+            && (starting_col == 0 || !region_positions.contains(&(starting_row, starting_col - 1)))
+        {
+            direction = Direction::Up;
+            edge_position = EdgePosition::Left;
         } else {
-            panic!("No edge found at ({}, {})", starting_row, starting_col);
+            panic!(
+                "Could not determine a starting orientation for ({}, {})",
+                starting_row, starting_col
+            );
         }
 
         num_total_edges += 1;
@@ -200,7 +209,11 @@ fn get_region_sides(grid: &[Vec<char>], region_positions: &HashSet<(usize, usize
         let starting_direction = direction;
         let starting_edge_position = edge_position;
         loop {
-            positions_with_edges.insert((row, col), edges - 1);
+            let Some((edges, explored_sides)) = positions_with_edges.get_mut(&(row, col)) else {
+                panic!("({}, {}) is not in the current garden", row, col);
+            };
+            *edges -= 1;
+            explored_sides.insert(edge_position);
 
             if direction == Direction::Up {
                 if edge_position == EdgePosition::Right {
@@ -379,7 +392,7 @@ fn get_region_sides(grid: &[Vec<char>], region_positions: &HashSet<(usize, usize
             }
         }
 
-        positions_with_edges.retain(|_, edges| *edges > 0);
+        positions_with_edges.retain(|_, (edges, _)| *edges > 0);
     }
 
     num_total_edges
@@ -407,7 +420,7 @@ fn get_plot_edges(grid: &[Vec<char>], plot: char, row: usize, col: usize) -> u64
     length
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 enum Direction {
     Up,
     Down,
@@ -415,7 +428,7 @@ enum Direction {
     Right,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 enum EdgePosition {
     Top,
     Bottom,
