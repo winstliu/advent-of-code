@@ -1,0 +1,38 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "cppvsdbg",
+            "request": "launch",
+            "name": "2024",
+            "program": "${workspaceFolder}/2024/target/debug/advent_of_code_2024.exe",
+            "args": [
+                "--day",
+                "${input:day}",
+                "--part",
+                "${input:part}"
+            ],
+            "cwd": "${workspaceFolder}/2024",
+            "preLaunchTask": "rust: cargo build 2024"
+        }
+    ],
+    "inputs": [
+        {
+            "id": "day",
+            "type": "promptString",
+            "description": "Day"
+        },
+        {
+            "id": "part",
+            "type": "pickString",
+            "description": "Part",
+            "options": [
+                "1",
+                "2"
+            ]
+        }
+    ]
+}
