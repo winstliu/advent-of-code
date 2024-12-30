@@ -24,6 +24,99 @@ pub fn part_1(contents: &str) -> Result<u64, String> {
 }
 
 pub fn part_2(contents: &str) -> Result<u64, String> {
+    let max_x = 100;
+    let max_y = 102;
+    let mut robots = try_parse_input(contents)?;
+    let mut steps = 0;
+    loop {
+        if steps % 1_000_000 == 0 {
+            println!("Progress: {}", steps);
+        }
+
+        let mut potential = true;
+        for y in max_y / 2 - 1..=max_y {
+            potential = true;
+            for x in 0..=max_x {
+                if !robots.iter().any(|((rx, ry), _)| *rx == x && *ry == y) {
+                    potential = false;
+                    break;
+                }
+            }
+
+            if potential {
+                break;
+            }
+        }
+
+        //           .
+        //          . .
+        //         .. ..
+        //         .   .
+        //        ..   ..
+
+
+        // for ((x, y), _) in robots.iter() {
+        //     if *x != max_x / 2 && !robots.iter().any(|((rx, ry), _)| *rx == max_x - x && ry == y) {
+        //         potential = false;
+        //         break;
+        //     }
+        // }
+
+        // for y in 0..max_x / 4 {
+        //     if y % 2 == 0 {
+        //         for x in 0..y / 2 + 1 {
+        //             if !robots
+        //                 .iter()
+        //                 .any(|((rx, ry), _)| *rx == max_x / 2 - y && *ry == y)
+        //                 || !robots
+        //                     .iter()
+        //                     .any(|((rx, ry), _)| *rx == max_x / 2 + y && *ry == y)
+        //             {
+        //                 potential = false;
+        //                 break;
+        //             }
+        //         }
+        //     }
+        // }
+
+        if potential {
+            println!("Steps: {}", steps);
+            for y in 0..=max_y {
+                for x in 0..=max_x {
+                    if robots.iter().any(|((rx, ry), _)| *rx == x && *ry == y) {
+                        print!(".");
+                    } else {
+                        print!(" ");
+                    }
+                }
+                println!();
+            }
+        }
+
+        // if robots.iter().any(|((x, y), _)| {
+        //     *x == max_x / 2 && *y == 0
+        // }) {
+        //     println!("Steps: {}", steps);
+        //     for y in 0..=max_y {
+        //         for x in 0..=max_x {
+        //             if robots.iter().any(|((rx, ry), _)| *rx == x && *ry == y) {
+        //                 print!(".");
+        //             } else {
+        //                 print!(" ");
+        //             }
+        //         }
+        //         println!();
+        //     }
+        // }
+
+        for ((x, y), (dx, dy)) in robots.iter_mut() {
+            *x = (*x as i64 + *dx).rem_euclid(max_x as i64 + 1) as u64;
+            *y = (*y as i64 + *dy).rem_euclid(max_y as i64 + 1) as u64;
+        }
+
+        steps += 1;
+    }
+
     Ok(0)
 }
 
