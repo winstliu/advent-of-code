@@ -4,10 +4,10 @@ pub fn part_1(contents: &str) -> Result<u64, String> {
     for line in contents.lines() {
         let (direction, amount) = line.split_at(1);
 
-        let amount = amount.parse::<i64>().map_err(|e| e.to_string())?;
-        result += match direction {
-            "L" => -amount,
-            "R" => amount,
+        let amount = amount.parse::<u64>().map_err(|e| e.to_string())?;
+        result = match direction {
+            "L" => result.strict_sub_unsigned(amount),
+            "R" => result.strict_add_unsigned(amount),
             _ => return Err("Invalid direction".to_string()),
         };
 
