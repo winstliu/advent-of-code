@@ -3,14 +3,14 @@
 	"tasks": [
 		{
 			"type": "cargo",
-			"label": "rust: cargo build 2024",
+			"label": "rust: cargo build 2025",
 			"command": "build",
 			"problemMatcher": [
 				"$rustc"
 			],
 			"group": "build",
 			"options": {
-				"cwd": "${workspaceFolder}/2024"
+				"cwd": "${workspaceFolder}/2025"
 			}
 		}
 	]

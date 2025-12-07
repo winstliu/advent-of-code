@@ -6,3 +6,4 @@ Doing this for fun, mostly to brush up on languages I don't typically have the c
 * [2022](/2022) (Rust)
 * [2023](/2023) (Rust)
 * [2024](/2024) (Rust)
+* [2025](/2025) (Rust)

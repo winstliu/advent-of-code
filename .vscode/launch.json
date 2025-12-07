@@ -7,16 +7,16 @@
         {
             "type": "cppvsdbg",
             "request": "launch",
-            "name": "2024",
-            "program": "${workspaceFolder}/2024/target/debug/advent_of_code_2024.exe",
+            "name": "2025",
+            "program": "${workspaceFolder}/2025/target/debug/advent_of_code_2025.exe",
             "args": [
                 "--day",
                 "${input:day}",
                 "--part",
                 "${input:part}"
             ],
-            "cwd": "${workspaceFolder}/2024",
-            "preLaunchTask": "rust: cargo build 2024"
+            "cwd": "${workspaceFolder}/2025",
+            "preLaunchTask": "rust: cargo build 2025"
         }
     ],
     "inputs": [
