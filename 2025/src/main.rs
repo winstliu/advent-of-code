@@ -1,4 +1,5 @@
 mod day_01;
+mod day_02;
 
 mod utilities;
 
@@ -18,7 +19,7 @@ struct Cli {
 fn main() -> Result<(), String> {
     let args = Cli::parse();
 
-    let puzzles = [[day_01::part_1, day_01::part_2]];
+    let puzzles = [[day_01::part_1, day_01::part_2], [day_02::part_1, day_02::part_2]];
 
     let days_to_run = match args.day {
         Some(day) if day <= puzzles.len() => day..=day,
