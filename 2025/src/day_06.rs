@@ -19,7 +19,7 @@ pub fn part_1(contents: &str) -> Result<u64, String> {
 
     let operators = contents
         .lines()
-        .nth(operands_per_equation)
+        .last()
         .ok_or("Expected operators line".to_string())?
         .split_ascii_whitespace()
         .map::<Result<fn(u64, u64) -> _, _>, _>(|operator| match operator {
@@ -42,5 +42,41 @@ pub fn part_1(contents: &str) -> Result<u64, String> {
 }
 
 pub fn part_2(contents: &str) -> Result<u64, String> {
-    Ok(0)
+    let operators = contents
+        .lines()
+        .last()
+        .ok_or("Expected operators line".to_string())?
+        .split_ascii_whitespace()
+        .map::<Result<fn(u64, u64) -> _, _>, _>(|operator| match operator {
+            "+" => Ok(u64::add),
+            "*" => Ok(u64::mul),
+            _ => Err("Unexpected operator".to_string()),
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+
+    let mut lines = contents
+        .lines()
+        .map(|line| line.chars())
+        .take(contents.lines().count() - 1)
+        .collect::<Vec<_>>();
+
+    operators.iter().try_fold(0, |acc, operator| {
+        let mut operands = Vec::new();
+        while let Some((_, operand)) = lines
+            .iter_mut()
+            .filter_map(|line| line.next().and_then(|c| c.to_digit(10)))
+            .map(|c| c.into())
+            .rev()
+            .enumerate()
+            .reduce(|(_, acc), (i, c)| (0, acc + c * 10u64.pow(i as u32)))
+        {
+            operands.push(operand);
+        }
+
+        Ok(acc
+            + operands
+                .into_iter()
+                .reduce(&operator)
+                .ok_or("Expected at least one operand".to_string())?)
+    })
 }
